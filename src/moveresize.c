@@ -630,7 +630,7 @@ clientMoveEventFilter (XEvent * xevent, gpointer data)
     screen_info = c->screen_info;
     display_info = screen_info->display_info;
     configure_flags = NO_CFG_FLAG;
-
+    
     /* Update the display time */
     myDisplayUpdateCurrentTime (display_info, xevent);
 
@@ -735,13 +735,47 @@ clientMoveEventFilter (XEvent * xevent, gpointer data)
           msy = xevent->xmotion.y_root;
           maxx = screen_info->width - 1;
           maxy = screen_info->height - 1; 
-	  if((msx <= 50 && msx >0) || ((msx > maxx-50) && msx < maxx))
+	  
+	  //left
+	  if((msx <= 50 && msx >0))
 	  {
-	      clientSetWidth(c,maxx/2,1);
-	      clientSetHeight(c,maxy,1);
+	      int mspx=0;
+	      int mspy=0;
+	      int mspw=maxx;
+	      int msph=maxy;
+	      clientMaxSpace(screen_info,&mspx,&mspy,&mspw,&msph);
 	      configure_flags = CFG_FORCE_REDRAW;
 	      passdata->move_resized = 1;
+	      wc.width = mspw/2+frameLeft(c)+frameRight(c);
+	      wc.height = msph-frameTop(c);
+	      //wc.x = 0;
+	      //wc.y = 0;
+	      c->x = mspx+frameLeft(c);
+	      c->y = mspy+frameTop(c);
 	      
+	      int changes = CWX | CWY | CWWidth | CWHeight;
+	      clientConfigure (c, &wc, changes, configure_flags);
+	      return;
+	  }
+	  if(((msx > maxx-50) && msx < maxx))
+	  {
+	      int mspx=maxx/2;
+	      int mspy=0;
+	      int mspw=maxx;
+	      int msph=maxy;
+	      clientMaxSpace(screen_info,&mspx,&mspy,&mspw,&msph);
+	      configure_flags = CFG_FORCE_REDRAW;
+	      passdata->move_resized = 1;
+	      wc.width = mspw/2+frameLeft(c)+frameRight(c);
+	      wc.height = msph-frameTop(c);
+	      //wc.x = 0;
+	      //wc.y = 0;
+	      c->x = mspx + frameLeft(c)*2+frameRight(c)*2;
+	      c->y = mspy+frameTop(c);
+	      
+	      int changes = CWX | CWY | CWWidth | CWHeight;
+	      clientConfigure (c, &wc, changes, configure_flags);
+	      return;
 	  }
 	}
         if ((screen_info->workspace_count > 1) && !(passdata->is_transient))
