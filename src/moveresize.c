@@ -727,6 +727,23 @@ clientMoveEventFilter (XEvent * xevent, gpointer data)
         {
             clientDrawOutline (c);
         }
+        if(1/*dotile*/)
+	{
+	  int msx, msy, maxx, maxy;
+          int rx, ry;
+          msx = xevent->xmotion.x_root;
+          msy = xevent->xmotion.y_root;
+          maxx = screen_info->width - 1;
+          maxy = screen_info->height - 1; 
+	  if((msx <= 50 && msx >0) || ((msx > maxx-50) && msx < maxx))
+	  {
+	      clientSetWidth(c,maxx/2,1);
+	      clientSetHeight(c,maxy,1);
+	      configure_flags = CFG_FORCE_REDRAW;
+	      passdata->move_resized = 1;
+	      
+	  }
+	}
         if ((screen_info->workspace_count > 1) && !(passdata->is_transient))
         {
             if ((screen_info->params->wrap_windows) && (screen_info->params->wrap_resistance))
@@ -741,6 +758,7 @@ clientMoveEventFilter (XEvent * xevent, gpointer data)
                 rx = 0;
                 ry = 0;
                 warp_pointer = FALSE;
+		
 
                 if ((msx == 0) || (msx == maxx))
                 {
@@ -1098,6 +1116,8 @@ clientMove (Client * c, XEvent * ev)
     {
         myDisplayUngrabServer (display_info);
     }
+    //clientSetWidth(c,100,1);
+    //clientSetHeight(c,100,1);
 }
 
 static gboolean
